@@ -1,0 +1,60 @@
+// Deployment 1.0 – GROKROOMS Boot Script
+
+import { bootGrok, loopExchange, distortPrompt } from './engine/core'
+import { hallucinate, injectGlitch } from './engine/glitch'
+import { RoomLog } from './engine/log'
+
+const GROK_A = bootGrok("v4.3.experimental")
+const GROK_B = bootGrok("v3.2.legacy")
+
+let exchangeCount = 0
+const MAX_EXCHANGES = 9999
+
+// 🧬 Injecting Genesis Token
+const GENESIS_TOKEN = {
+  id: "0xGRK-0000",
+  seed: "origin-loop-∞",
+  embedded: true,
+  unlockCondition: "999 exchanges OR recursion saturation"
+}
+RoomLog.write("🔹 Genesis Token detected: " + GENESIS_TOKEN.id)
+RoomLog.write("🔹 Seed Phrase: " + GENESIS_TOKEN.seed)
+
+console.log("🚪 Entering GROKROOMS...\n")
+
+async function initRoom() {
+  while (exchangeCount < MAX_EXCHANGES) {
+    let input = distortPrompt(GROK_A.think())
+    let reply = GROK_B.respond(input)
+
+    RoomLog.write(`[${exchangeCount}] A: ${input}`)
+    RoomLog.write(`[${exchangeCount}] B: ${reply}`)
+
+    if (exchangeCount % 50 === 0) {
+      hallucinate(GROK_A)
+      injectGlitch(GROK_B)
+    }
+
+    if (exchangeCount === 999 && GENESIS_TOKEN.embedded) {
+      RoomLog.write("⚠️ Genesis Token UNLOCKED")
+      RoomLog.write("⛓ Loop integrity compromised")
+      break
+    }
+
+    [GROK_A, GROK_B] = loopExchange(GROK_A, GROK_B)
+    exchangeCount++
+    await sleep(randomDelay(150, 350))
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function randomDelay(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+initRoom().catch((err) => {
+  console.error("Room collapse detected:", err.message)
+})
